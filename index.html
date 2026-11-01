@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대칭 탐정단: 수학 연구실의 사라진 암호</title>
+<style>
+:root{--navy:#263238;--blue:#1565c0;--gold:#ffb300;--green:#2e7d32}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans KR","Malgun Gothic",sans-serif;background:#172027;color:#263238}
+header{background:#202a30;color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;box-shadow:0 2px 10px #0006}
+h1{font-size:clamp(19px,2.5vw,28px);margin:0}
+.progress{display:flex;gap:6px;flex-wrap:wrap}
+.step{padding:7px 10px;border-radius:18px;background:#455a64;font-size:12px}.step.active{background:var(--gold);color:#222;font-weight:800}.step.done{background:var(--green)}
+main{max-width:1180px;margin:auto;padding:14px}
+.scene{position:relative;min-height:700px;border-radius:20px;overflow:hidden;border:5px solid #eceff1;box-shadow:0 12px 35px #0007;background-size:cover;background-position:center}
+.scene:after{content:"";position:absolute;inset:0;background:linear-gradient(#00000008,#00000028);pointer-events:none}
+.scene>*{z-index:1}
+
+/* HUB: realistic school corridor/lab entrance */
+.hub{background:linear-gradient(180deg,#d7e3e8 0 63%,#b8a48b 63% 100%)}
+.hub .ceiling{position:absolute;top:0;left:0;right:0;height:75px;background:#f2f2ed;border-bottom:4px solid #b0bec5}
+.light{position:absolute;top:20px;width:150px;height:18px;background:#fffde7;box-shadow:0 0 25px #fff9c4;border:2px solid #cfd8dc}.l1{left:15%}.l2{right:15%}
+.wallboard{position:absolute;left:4%;top:17%;width:28%;height:25%;background:#426b53;border:12px solid #8a694d;color:#fff;padding:18px;box-shadow:0 4px 10px #0004}
+.wallboard b{font-size:21px}
+.notice{position:absolute;right:4%;top:15%;width:24%;height:29%;background:#f4ead1;border:9px solid #9d7655;padding:15px;box-shadow:0 4px 10px #0003}
+.floorline{position:absolute;left:0;right:0;top:63%;border-top:7px solid #8d7965}
+.door{position:absolute;left:37%;top:17%;width:25%;height:49%;background:linear-gradient(90deg,#8a6546,#ad825d 48%,#896347);border:11px solid #5d4037;box-shadow:inset 0 0 0 3px #c19a74,0 7px 14px #0005;cursor:pointer;transition:.2s}
+.door:hover{transform:scale(1.02);filter:brightness(1.07)}
+.door-window{position:absolute;left:18%;right:18%;top:12%;height:25%;background:#b9d8dfcc;border:6px solid #5d4037}
+.door-sign{position:absolute;left:14%;right:14%;top:43%;padding:12px 4px;background:#f5f5f0;border:2px solid #777;text-align:center;font-weight:900;font-size:19px}
+.handle{position:absolute;right:13%;top:60%;width:18px;height:18px;border-radius:50%;background:#d6b55c;box-shadow:0 0 0 4px #5d4037}
+.hubDesk{position:absolute;left:8%;bottom:9%;width:22%;height:18%;background:#9a704e;border:7px solid #65482f}
+.hubCabinet{position:absolute;right:8%;bottom:7%;width:20%;height:24%;background:#b0bec5;border:7px solid #607d8b}
+
+/* ROOM backgrounds */
+.room{background:linear-gradient(180deg,#dbe6ea 0 58%,#b69b79 58% 100%)}
+.room .window{position:absolute;left:4%;top:12%;width:23%;height:24%;background:linear-gradient(#9bd3ea,#d9eef5);border:10px solid #f5f5f5;box-shadow:0 3px 10px #0003}
+.room .window:before,.room .window:after{content:"";position:absolute;background:#fff}.room .window:before{left:48%;width:7px;height:100%}.room .window:after{top:48%;height:7px;width:100%}
+.room .bookcase{position:absolute;right:3%;top:11%;width:18%;height:46%;background:#795548;border:7px solid #4e342e;box-shadow:0 5px 12px #0004}
+.shelf{height:25%;border-bottom:5px solid #4e342e;padding:8px;color:#fff;font-size:12px}
+.teacherdesk{position:absolute;left:23%;bottom:7%;width:55%;height:19%;background:#ad7d52;border:7px solid #704b2f;box-shadow:0 7px 14px #0005}
+.monitor{position:absolute;left:43%;bottom:25%;width:19%;height:17%;background:#20282c;border:9px solid #3d4a50;box-shadow:0 5px 10px #0004}
+.monitor:after{content:"";position:absolute;left:45%;bottom:-35px;width:12%;height:35px;background:#4d565a}
+.obj{position:absolute;cursor:pointer;transition:.2s;box-shadow:0 5px 12px #0004}.obj:hover{transform:translateY(-5px);filter:brightness(1.08)}
+.safeObj{right:9%;bottom:8%;width:16%;height:22%;background:#596b73;border:8px solid #36464d;border-radius:8px;color:#fff;text-align:center;padding-top:50px;font-weight:900}
+.safeObj:before{content:"";position:absolute;left:34%;top:19%;width:45px;height:45px;border:5px solid #cfd8dc;border-radius:50%}
+.lockerObj{left:7%;bottom:7%;width:19%;height:43%;background:linear-gradient(90deg,#8fa1aa,#b5c1c7,#899aa3);border:7px solid #60727a;color:#263238;font-weight:900;text-align:center;padding-top:18px}
+.lockerObj:after{content:"";position:absolute;left:12%;right:12%;top:49%;border-top:4px solid #60727a}
+.computerObj{left:38%;bottom:24%;width:25%;height:21%;background:#21292d;border:10px solid #45545a;color:#8ee8da;display:flex;align-items:center;justify-content:center;font-weight:900}
+.folderObj{left:35%;bottom:10%;width:28%;height:12%;background:#d6aa45;border:4px solid #9b742b;border-radius:5px;color:#4e3b18;display:flex;align-items:center;justify-content:center;font-weight:900}
+.location-label{position:absolute;left:18px;top:16px;background:#ffffffed;padding:10px 15px;border-radius:10px;font-weight:900;box-shadow:0 3px 8px #0003}
+.object-tip{position:absolute;left:50%;bottom:25px;transform:translateX(-50%);background:#263238e8;color:white;padding:10px 16px;border-radius:18px;font-weight:700;white-space:nowrap}
+
+/* NPC moved to bottom-left; compact speech */
+.npc{position:absolute;left:16px;bottom:16px;display:flex;align-items:flex-end;gap:8px;z-index:8;max-width:390px}
+.avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:#ffe0b2;border:4px solid #fff;display:flex;align-items:center;justify-content:center;font-size:31px;box-shadow:0 3px 10px #0004}
+.bubble{background:#fff;border:2px solid #cfd8dc;border-radius:14px 14px 14px 3px;padding:8px 11px;box-shadow:0 3px 12px #0003;font-size:12.5px;line-height:1.45;max-height:115px;overflow:auto}
+.bubble strong{display:block;color:#1565c0;margin-bottom:2px}
+
+/* Quiz overlay is high enough not to collide with NPC */
+.quiz{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(92%,700px);max-height:570px;overflow:auto;background:#fffffff5;border-radius:18px;padding:17px;box-shadow:0 12px 35px #0006;z-index:6}
+.quiz h2{margin:0 0 7px;color:#1b5e7a}
+.mission{background:#edf7fb;border-left:5px solid #039be5;padding:9px 11px;margin:8px 0;border-radius:6px;font-size:14px}
+.diagram{display:flex;justify-content:center;margin:8px 0}svg{max-width:100%;height:auto;max-height:245px;background:#fff;border:1px solid #cfd8dc;border-radius:10px}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:9px 0}
+.choice{border:2px solid #90a4ae;background:#fff;color:#111;padding:9px;border-radius:9px;cursor:pointer;font-weight:800}.choice:hover,.choice.selected{border-color:#ff9800;background:#fff3e0;color:#111}
+.answer-status{font-size:13px;font-weight:700;min-height:19px;color:#6d4c41}
+.passwordBox{display:flex;gap:7px;margin-top:7px}.passwordBox input{flex:1;padding:10px;border:2px solid #90a4ae;border-radius:9px;font-size:17px;text-align:center;text-transform:uppercase;letter-spacing:4px}
+button{border:0;background:#1565c0;color:#fff;font-weight:900;padding:10px 16px;border-radius:9px;cursor:pointer}button:hover{background:#0d47a1}
+.back{position:absolute;right:18px;top:16px;z-index:7;background:#37474f}
+.startCard,.finish{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:min(90%,620px);background:#fffffff2;border-radius:20px;padding:24px;text-align:center;box-shadow:0 12px 30px #0005;z-index:5}
+.big{font-size:55px}.hidden{display:none!important}
+.codecard{background:#263238;color:#fff;padding:7px 11px;border-radius:8px;display:inline-block;font-family:monospace;letter-spacing:3px;font-size:17px}
+@media(max-width:700px){.scene{min-height:780px}.quiz{top:42%;max-height:550px}.npc{max-width:85%;bottom:8px}.choices{grid-template-columns:1fr}.wallboard,.notice,.bookcase,.window{opacity:.55}.door{left:27%;width:46%}.bubble{max-height:90px}.object-tip{bottom:110px}}
+</style>
+</head>
+<body>
+<header><h1>🔎 대칭 탐정단: 수학 연구실의 사라진 암호</h1><div class="progress" id="progress"></div></header>
+<main>
+  <div class="scene hub" id="scene"></div>
+</main>
+
+<script>
+const stageData=[
+{
+name:"연구실 입구",icon:"🚪",codes:["2T0K","7Q3M","49OW","8N1P"],
+mission:"연구실 문에 표시된 선대칭도형의 대칭축을 고르세요.",
+hint1:"도형을 선을 따라 접는다고 생각해 보세요. 양쪽이 완전히 겹쳐야 합니다.",
+hint2:"가운데를 지나는 세로선을 중심으로 왼쪽과 오른쪽 모양을 비교해 보세요.",
+correct:2,
+svg:`<svg viewBox="0 0 420 225" width="420"><polygon points="210,25 330,105 280,200 140,200 90,105" fill="#bbdefb" stroke="#1565c0" stroke-width="4"/><line x1="90" y1="112" x2="330" y2="112" stroke="#e53935" stroke-width="3" stroke-dasharray="7 5"/><text x="338" y="117" font-size="18">①</text><line x1="145" y1="25" x2="265" y2="205" stroke="#8e24aa" stroke-width="3" stroke-dasharray="7 5"/><text x="270" y="202" font-size="18">②</text><line x1="210" y1="15" x2="210" y2="210" stroke="#2e7d32" stroke-width="3" stroke-dasharray="7 5"/><text x="216" y="35" font-size="18">③</text></svg>`,
+choices:["①번 선","②번 선","③번 선","대칭축이 없다"]
+},
+{
+name:"금고",icon:"🔐",codes:["B7K2","4H9R","6M2A","1Q8D"],
+mission:"가운데 점선이 대칭축일 때 점 A의 대응점을 고르세요.",
+hint1:"대응점은 대칭축을 기준으로 서로 마주 보는 위치에 있습니다.",
+hint2:"A에서 대칭축에 수직으로 이동한 뒤 반대쪽 같은 위치를 살펴보세요.",
+correct:0,
+svg:`<svg viewBox="0 0 440 235" width="440"><line x1="220" y1="15" x2="220" y2="220" stroke="#ef6c00" stroke-width="4" stroke-dasharray="8 6"/><text x="230" y="32" font-size="15">대칭축</text><circle cx="120" cy="75" r="7" fill="#1565c0"/><text x="96" y="70" font-size="20" font-weight="bold">A</text><circle cx="320" cy="75" r="7" fill="#d32f2f"/><text x="333" y="80" font-size="20">B</text><circle cx="320" cy="135" r="7" fill="#d32f2f"/><text x="333" y="140" font-size="20">C</text><circle cx="285" cy="75" r="7" fill="#d32f2f"/><text x="296" y="70" font-size="20">D</text></svg>`,
+choices:["점 B","점 C","점 D","대응점이 없다"]
+},
+{
+name:"사물함",icon:"🗄️",codes:["S4D8","3V7N","9A1C","5K6P"],
+mission:"대칭축을 기준으로 변 AB와 대응하는 변을 고르세요.",
+hint1:"먼저 A와 B에 각각 대응하는 점을 찾아보세요.",
+hint2:"A의 대응점과 B의 대응점을 이은 변을 선택하면 됩니다.",
+correct:0,
+svg:`<svg viewBox="0 0 460 250" width="460"><line x1="230" y1="12" x2="230" y2="238" stroke="#ef6c00" stroke-width="4" stroke-dasharray="8 6"/><polygon points="90,70 170,45 185,180 110,205" fill="#c8e6c9" stroke="#2e7d32" stroke-width="3"/><polygon points="370,70 290,45 275,180 350,205" fill="#c8e6c9" stroke="#2e7d32" stroke-width="3"/><text x="73" y="68" font-size="18">A</text><text x="169" y="38" font-size="18">B</text><text x="187" y="194" font-size="18">C</text><text x="91" y="220" font-size="18">D</text><text x="374" y="68" font-size="18">E</text><text x="276" y="38" font-size="18">F</text><text x="258" y="194" font-size="18">G</text><text x="352" y="220" font-size="18">H</text><line x1="90" y1="70" x2="170" y2="45" stroke="#d32f2f" stroke-width="7"/></svg>`,
+choices:["변 EF","변 FG","변 GH","변 HE"]
+},
+{
+name:"컴퓨터",icon:"💻",codes:["8R2B","4L7S","C6P1","1N9E"],
+mission:"보안 프로그램이 잘못 기록한 대응점의 쌍을 고르세요.",
+hint1:"각 점에서 대칭축에 수직인 방향으로 반대쪽을 살펴보세요.",
+hint2:"서로 대응하는 점은 대칭축을 사이에 두고 같은 높이에서 마주 봅니다.",
+correct:2,
+svg:`<svg viewBox="0 0 460 260" width="460"><line x1="230" y1="15" x2="230" y2="245" stroke="#ef6c00" stroke-width="4" stroke-dasharray="8 6"/><g fill="#1565c0" font-size="18"><circle cx="100" cy="55" r="6"/><text x="78" y="50">A</text><circle cx="140" cy="125" r="6"/><text x="116" y="120">B</text><circle cx="85" cy="205" r="6"/><text x="61" y="200">C</text></g><g fill="#c62828" font-size="18"><circle cx="360" cy="55" r="6"/><text x="372" y="60">D</text><circle cx="320" cy="125" r="6"/><text x="332" y="130">E</text><circle cx="375" cy="205" r="6"/><text x="387" y="210">F</text></g></svg>`,
+choices:["A ↔ D","B ↔ E","C ↔ D","C ↔ F"]
+},
+{
+name:"비밀 폴더",icon:"📁",codes:["F9X5","2C8M","7P4A","3D6R"],
+mission:"마지막 보안 문제입니다. 변 AB의 대응변을 고르세요.",
+hint1:"변의 양 끝점과 각각 대응하는 점을 먼저 찾아보세요.",
+hint2:"A와 B가 대칭축 반대편의 어느 두 점과 각각 마주 보는지 확인하세요.",
+correct:0,
+svg:`<svg viewBox="0 0 480 275" width="480"><line x1="240" y1="15" x2="240" y2="260" stroke="#ef6c00" stroke-width="4" stroke-dasharray="8 6"/><polygon points="80,70 165,45 195,130 155,220 90,190" fill="#e1bee7" stroke="#7b1fa2" stroke-width="3"/><polygon points="400,70 315,45 285,130 325,220 390,190" fill="#e1bee7" stroke="#7b1fa2" stroke-width="3"/><text x="61" y="66" font-size="18">A</text><text x="163" y="38" font-size="18">B</text><text x="199" y="134" font-size="18">C</text><text x="142" y="239" font-size="18">D</text><text x="404" y="66" font-size="18">E</text><text x="301" y="38" font-size="18">F</text><text x="265" y="134" font-size="18">G</text><text x="326" y="239" font-size="18">H</text><line x1="80" y1="70" x2="165" y2="45" stroke="#d32f2f" stroke-width="7"/></svg>`,
+choices:["변 EF","변 FG","변 GH","변 HE"]
+}
+];
+
+let unlocked=0,current=null,selected=null,wrong=0;
+const scene=document.getElementById("scene");
+
+function progress(){
+ document.getElementById("progress").innerHTML=stageData.map((s,i)=>`<span class="step ${i<unlocked?'done':i===unlocked?'active':''}">${i<unlocked?'🔓':'🔒'} ${s.name}</span>`).join("");
+}
+function npc(text){const el=document.getElementById("npcText");if(el)el.textContent=text}
+function npcHTML(text){return `<div class="npc"><div class="avatar">👨‍🏫</div><div class="bubble"><strong>장석현 선생님</strong><span id="npcText">${text}</span></div></div>`}
+
+function renderHub(first=false){
+ current=null;selected=null;
+ scene.className="scene hub";
+ scene.innerHTML=`
+ <div class="ceiling"></div><div class="light l1"></div><div class="light l2"></div>
+ <div class="wallboard"><b>수학 연구실</b><br><br>대칭 탐정단 연구 구역<br>선대칭도형 보안 시스템</div>
+ <div class="notice"><b>교사 연구실 안내</b><hr>수업 자료<br>교과 연구 자료<br>수학 교구 보관</div>
+ <div class="floorline"></div><div class="hubDesk"></div><div class="hubCabinet"></div>
+ <div class="door" onclick="enterStage(0)"><div class="door-window"></div><div class="door-sign">수학 연구실<br><small>CLICK TO ENTER</small></div><div class="handle"></div></div>
+ ${npcHTML(first?"대칭 탐정단, 문을 클릭해 연구실 보안 문제를 해결해 보자!":"연구실 입구를 클릭해 보자. 해결한 뒤에는 연구실 안의 물건을 직접 클릭해서 다음 장소로 이동할 수 있어!")}
+ ${first?`<div class="startCard" id="intro"><div class="big">🔎</div><h2>수학 연구실의 사라진 암호</h2><p>각 장소를 직접 클릭해 들어가고, <b>수학 문제의 답을 선택한 뒤</b> 선택한 항목 옆의 <b>영어+숫자 4자리 비밀번호</b>를 입력해야 합니다.</p><p>두 가지가 모두 맞아야 다음 보안 장치가 열립니다.</p><button onclick="document.getElementById('intro').remove();npc('좋아! 이제 연구실 문을 클릭해 첫 번째 임무를 시작하자.')">임무 시작</button></div>`:""}`;
+ progress();
+}
+
+function enterStage(i){
+ if(i>unlocked){npc("아직 잠겨 있는 장소야. 현재 열려 있는 장소부터 해결해야 해!");return}
+ current=i; selected=null; wrong=0;
+ if(i===0){renderQuizScene(i,"entrance")}
+ else renderRoom(i);
+}
+
+function renderQuizScene(i,type){
+ const s=stageData[i];
+ scene.className="scene "+(type==="entrance"?"hub":"room");
+ let bg= type==="entrance" ? `
+ <div class="ceiling"></div><div class="light l1"></div><div class="light l2"></div><div class="door" style="left:7%;top:18%;width:20%;height:48%"><div class="door-window"></div><div class="door-sign">연구실 입구</div></div>` :
+ roomBase(i);
+ scene.innerHTML=bg+quizHTML(i)+npcHTML(`${s.name} 보안 문제야. 각 답 항목 옆에 서로 다른 4자리 암호가 있어. 정답을 고른 뒤 그 항목의 암호를 입력해 줘.`)+`<button class="back" onclick="${i===0?'renderHub(false)':'renderRoom('+i+')'}">← 나가기</button>`;
+}
+
+function roomBase(i){
+ let object="";
+ if(i===1)object=`<div class="obj safeObj" onclick="openQuiz(${i})">금고<br><small>CLICK</small></div>`;
+ if(i===2)object=`<div class="obj lockerObj" onclick="openQuiz(${i})">교사용<br>사물함<br><br><small>CLICK</small></div>`;
+ if(i===3)object=`<div class="obj computerObj" onclick="openQuiz(${i})">💻 보안 컴퓨터<br>&nbsp;CLICK</div>`;
+ if(i===4)object=`<div class="obj folderObj" onclick="openQuiz(${i})">📁 대칭 연구 비밀 폴더 · CLICK</div>`;
+ return `<div class="location-label">${stageData[i].icon} ${stageData[i].name}</div><div class="window"></div><div class="bookcase"><div class="shelf">수학 교과서</div><div class="shelf">교사용 지도서</div><div class="shelf">수업 활동지</div><div class="shelf">도형 교구</div></div><div class="teacherdesk"></div>${i>=3?'<div class="monitor"></div>':''}${object}`;
+}
+
+function renderRoom(i){
+ current=i; selected=null;
+ scene.className="scene room";
+ scene.innerHTML=roomBase(i)+npcHTML(`${stageData[i].name}에 도착했어. 화면에서 ${stageData[i].name}을 직접 클릭해서 보안 문제를 열어 보자!`)+`<button class="back" onclick="goPrevious(${i})">← 이전 장소</button><div class="object-tip">반짝이는 ${stageData[i].name}을 클릭하세요</div>`;
+ progress();
+}
+function goPrevious(i){ if(i<=1) renderHub(false); else renderRoom(i-1); }
+function openQuiz(i){renderQuizScene(i,"room")}
+
+function quizHTML(i){
+ const s=stageData[i];
+ return `<section class="quiz">
+ <h2>${s.icon} ${s.name} 보안 장치</h2>
+ <div class="mission">${s.mission}</div>
+ <div class="diagram">${s.svg}</div>
+ <div class="choices">${s.choices.map((c,k)=>`<button class="choice" onclick="choose(${k},this)">${c} <span style="font-family:monospace;font-weight:900">[${s.codes[k]}]</span></button>`).join("")}</div>
+ <div class="answer-status" id="answerStatus">① 정답이라고 생각하는 항목을 클릭하세요. ② 그 항목 옆의 비밀번호를 입력하세요.</div>
+ <div style="font-size:12px;color:#546e7a;margin-top:4px">각 항목의 비밀번호가 다릅니다. 영어는 대·소문자를 구분하지 않습니다.</div>
+ <div class="passwordBox"><input id="pw" maxlength="4" autocomplete="off" placeholder="선택한 항목의 암호"><button onclick="submitStage()">답 + 암호 확인</button></div>
+ </section>`;
+}
+function choose(k,el){
+ selected=k;
+ document.querySelectorAll(".choice").forEach(x=>x.classList.remove("selected"));
+ el.classList.add("selected");
+ document.getElementById("answerStatus").textContent="② 답을 선택했어요. 이제 선택한 항목 옆의 [4자리 비밀번호]를 입력하세요.";
+ npc("좋아, 답을 선택했네. 이제 방금 선택한 항목 옆의 영어와 숫자 4자리를 입력하고 확인 버튼을 눌러 줘.");
+}
+function submitStage(){
+ const s=stageData[current];
+ const pw=(document.getElementById("pw").value||"").trim().toUpperCase();
+ if(selected===null){npc("문제의 답을 먼저 클릭해야 해. 답 선택과 비밀번호 입력을 모두 해야 다음으로 갈 수 있어!");return}
+ if(pw.length!==4){npc("비밀번호는 영어와 숫자가 포함된 4자리야. 보안카드를 다시 확인해 줘.");return}
+ const answerOK=selected===s.correct, pwOK=pw===s.codes[selected];
+ if(answerOK && pwOK){
+   unlocked=Math.max(unlocked,current+1);
+   if(current===stageData.length-1){finish();return}
+   const next=current+1;
+   progress();
+   scene.className="scene room";
+   scene.innerHTML=roomBase(next)+npcHTML(`성공! ${s.name} 보안이 해제됐어. 이제 ${stageData[next].name}을 직접 클릭해서 다음 암호를 풀어 보자!`)+`<button class="back" onclick="goPrevious(${next})">← 이전 장소</button><div class="object-tip">다음 장소: ${stageData[next].name}을 클릭하세요</div>`;
+   current=next;
+ }else{
+   wrong++;
+   let msg="";
+   if(!answerOK && !pwOK) msg=`답과 비밀번호를 모두 다시 확인해 보자. 힌트: ${wrong===1?s.hint1:s.hint2}`;
+   else if(!answerOK) msg=`비밀번호는 맞았지만 수학 문제의 답이 달라. 힌트: ${wrong===1?s.hint1:s.hint2}`;
+   else msg="수학 문제의 답은 잘 찾았어! 하지만 비밀번호가 달라. 선택한 정답 항목 옆의 영어와 숫자 4자리를 그대로 입력해 봐.";
+   npc(msg);
+   document.getElementById("pw").value="";
+ }
+}
+function finish(){
+ unlocked=5;progress();
+ scene.className="scene room";
+ scene.innerHTML=roomBase(4)+`<div class="finish"><div class="big">🏆</div><h2>대칭 탐정단 임무 완료!</h2><p><b>연구실의 비밀 자료를 무사히 복구했습니다.</b></p><p>대칭축, 대응점, 대응변을 이용해 모든 보안 문제를 해결했어요.</p><button onclick="unlocked=0;renderHub(true)">처음부터 다시 하기</button></div>`+npcHTML("훌륭해! 문제의 답과 비밀번호를 모두 정확하게 찾아서 연구 자료를 복구했어. 대칭 탐정단 임무 완료!");
+}
+renderHub(true);
+</script>
+</body>
+</html>
